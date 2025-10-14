@@ -5,7 +5,7 @@
 #include <ArduinoJson.h> // Compatible amb versió 7.4.2
 
 // Device ID
-const char *deviceId = "G5_Gri";
+const char *deviceId = "G2_Gri";
 
 // Wi-Fi credentials
 const char *ssid = "Robotics_UB";
@@ -21,8 +21,8 @@ int s1Status = HIGH;
 int s2Status = HIGH;
 
 // UDP settings
-IPAddress receiverESP32IP(192, 168, 1, 53); // IP of receiver ESP32
-IPAddress receiverComputerIP(192, 168, 1, 55); // IP of PC
+IPAddress receiverESP32IP(192, 168, 1, 23); // IP of receiver ESP32
+IPAddress receiverComputerIP(192, 168, 1, 25); // IP of PC
 const int udpPort = 12345;
 WiFiUDP udp;
 
@@ -63,6 +63,13 @@ void sendOrientationUDP() {
   doc["yaw"] = Gri_yaw;
   doc["s1"] = s1Status;
   doc["s2"] = s2Status;
+
+  // Serial.print("Roll: ");
+  //Serial.print(Gri_roll);
+  //Serial.print(", Pitch: ");
+  //Serial.print(Gri_pitch);
+  //Serial.print(", Yaw: ");
+  //Serial.println(Gri_yaw);
 
   char jsonBuffer[512];
   serializeJson(doc, jsonBuffer, sizeof(jsonBuffer));

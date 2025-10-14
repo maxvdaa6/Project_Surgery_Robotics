@@ -5,7 +5,7 @@
 #include <ArduinoJson.h>  // No cal .hpp, la versió 7 manté compatibilitat amb .h
 
 // Device ID
-const char *deviceId = "G5_Endo";
+const char *deviceId = "G2_Endo";
 
 // Wi-Fi credentials
 const char *ssid = "Robotics_UB";
@@ -18,7 +18,7 @@ int s3Status = HIGH;
 int s4Status = HIGH;
 
 // UDP settings
-IPAddress receiverComputerIP(192, 168, 1, 55);
+IPAddress receiverComputerIP(192, 168, 1, 25);
 const int udpPort = 12345;
 WiFiUDP udp;
 
@@ -59,6 +59,12 @@ void sendOrientationUDP() {
   doc["yaw"] = Endo_yaw;
   doc["s3"] = s3Status;
   doc["s4"] = s4Status;
+  //Serial.print("Roll: ");
+  //Serial.println(Endo_roll);
+  //Serial.print("Pitch: ");
+  //Serial.println(Endo_pitch);
+  //Serial.print("Yaw: ");
+  //Serial.println(Endo_yaw);
 
   char jsonBuffer[512];
   serializeJson(doc, jsonBuffer, sizeof(jsonBuffer));

@@ -5,15 +5,15 @@
 #include <ESP32Servo.h>
 
 // Device ID
-const char *deviceId = "G5_Servos";
+const char *deviceId = "G2_Servos";
 
 // Wi-Fi credentials
 const char *ssid = "Robotics_UB";
 const char *password = "rUBot_xx";
 
 // UDP settings
-IPAddress receiverESP32IP(192, 168, 1, 51);
-IPAddress receiverComputerIP(192, 168, 1, 55);
+IPAddress receiverESP32IP(192, 168, 1, 21);
+IPAddress receiverComputerIP(192, 168, 1, 25);
 const int udpPort = 12345;
 WiFiUDP udp;
 

@@ -9,7 +9,7 @@ import json
 import os
 
 # Define the relative and absolute path to the RoboDK project file
-relative_path = "src/roboDK/SurgeryRobotics.rdk"
+relative_path = "Project_Surgery_Robotics/src/roboDK/SurgeryRobotics.rdk"
 absolute_path = os.path.abspath(relative_path)
 # Constants
 UDP_IP = "0.0.0.0"
@@ -73,10 +73,10 @@ def read_data_UDP():
             try:
                 received_data = json.loads(data.decode())
                 device_id = received_data.get("device")
-                if device_id == "G5_Endo":
+                if device_id == "G2_Endo":
                     with data_lock:
                         Endowrist_rpy = received_data
-                elif device_id == "G5_Gri":
+                elif device_id == "G2_Gri":
                     with data_lock:
                         Gripper_rpy = received_data
             except json.JSONDecodeError:
