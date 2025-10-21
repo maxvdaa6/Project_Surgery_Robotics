@@ -107,9 +107,14 @@ void loop() {
 
 For this exemple you do not need any library, but in a general project to add libraries:
 
+### Simple libraries
 - Go to the PlatformIO Home → Libraries tab.
 - Search for the library you want.
 - Click "Add to Project" and select your project.
+### Custom libraries
+- Add the library folder to the `lib` folder of your project.
+
+This is the case of IMU_Robotics_UB library in `Endowrist_IMU` project.
 
 ## 🚀 Upload and Monitor
 

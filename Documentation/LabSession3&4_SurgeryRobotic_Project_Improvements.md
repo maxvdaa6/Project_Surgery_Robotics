@@ -34,7 +34,22 @@ The main improvements are based on:
     - receives the RPY angles from Endowrist module and correct the gripper orientation
     - receives the torques from the Servomotors module.
     - Apply a vibration with actuator to feel the contact with the tissue.
-
+        - You have to add on void setup() the following code:
+        ```cpp
+        // Configure PWM for the vibration motor (channel 0)
+        ledcSetup(0, 5000, 8); // Channel 0, frequency 5kHz, resolution 8 bits
+        ledcAttachPin(vibrationPin, 0); // Attach the vibration motor to channel 0
+        ````
+        - You have to add on void receiveTorquesUDP() the following code:
+        ```cpp
+        // Vibration motor control based on torque values
+        float totalTorque = Torque_roll1 + Torque_pitch + Torque_yaw;
+        // Convert torque to PWM value (0-255)
+        int vibrationValue = constrain(totalTorque * 2.5, 0, 255); // Adjust the scaling factor as needed
+        ledcWrite(0, vibrationValue); // Set the PWM value for the vibration motor
+        Serial.print("Vibration motor value: ");
+        Serial.println(vibrationValue); 
+        ```
 - PC module:
     - receives the RPY corrected angles from the Gripper module and perform the simulated gripper orientation
     - receives the RPY angles from the Endowrist module and apply them to the UR5e robot arm with a proper python based sockets program
