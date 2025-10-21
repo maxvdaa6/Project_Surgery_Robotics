@@ -4,6 +4,9 @@
 #include <ArduinoJson.h> // Compatible amb versió 7.4.2
 #include <ESP32Servo.h>
 
+
+
+
 // Device ID
 const char *deviceId = "G2_Servos";
 
@@ -94,6 +97,31 @@ void receiveOrientationUDP() {
       }
     }
   }
+}
+
+void sendTorqueUDP() {
+  JsonDocument doc;
+
+
+
+  doc["device"] = deviceId;
+  doc["Torque_Roll_1"] = getTorque(xxxxxx);
+  doc["Torque_Roll_2"] = getTorque(xxxxxx);
+  doc["Torque_Pitch"] = getTorque(xxxxxx);
+  doc["Torque_Yawn"] = getTorque(xxxxxx);
+
+  char jsonBuffer[512];
+  serializeJson(doc, jsonBuffer);
+
+  // Send to ESP32 Servos
+  udp.beginPacket(receiverESP32IP, udpPort);
+  udp.write((const uint8_t*)jsonBuffer, strlen(jsonBuffer));
+  udp.endPacket();
+
+  // Send to Computer
+  udp.beginPacket(receiverComputerIP, udpPort);
+  udp.write((const uint8_t*)jsonBuffer, strlen(jsonBuffer));
+  udp.endPacket();
 }
 
 float getCurrent(uint32_t integrationTimeMs, int pin) {

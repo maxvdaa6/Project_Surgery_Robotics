@@ -9,7 +9,7 @@ import json
 import os
 
 # Define the relative and absolute path to the RoboDK project file
-relative_path = "Project_Surgery_Robotics/src/roboDK/SurgeryRobotics.rdk"
+relative_path = "src/roboDK/SurgeryRobotics.rdk"
 absolute_path = os.path.abspath(relative_path)
 # Constants
 UDP_IP = "0.0.0.0"
