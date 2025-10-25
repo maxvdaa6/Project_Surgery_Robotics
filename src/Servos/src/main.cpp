@@ -4,6 +4,9 @@
 #include <ArduinoJson.h> // Compatible amb versió 7.4.2
 #include <ESP32Servo.h>
 
+//DEfine variables for getToruque function
+#define sum = 0
+#define previous = 0
 
 
 
@@ -102,13 +105,17 @@ void receiveOrientationUDP() {
 void sendTorqueUDP() {
   JsonDocument doc;
 
+  TorqueRoll1 = getTorque(sumRoll1, PIN_ANALOG_ROLL1, prevRoll1);
+  TorqueRoll2 = getTorque(sumRoll2, PIN_ANALOG_ROLL2, prevRoll2);
+  TorquePitch = getTorque(sumPitch, PIN_ANALOG_PITCH, prevPitch);
+  TorqueYaw = getTorque(sumYaw, PIN_ANALOG_YAW, prevYaw);
 
 
   doc["device"] = deviceId;
-  doc["Torque_Roll_1"] = getTorque(xxxxxx);
-  doc["Torque_Roll_2"] = getTorque(xxxxxx);
-  doc["Torque_Pitch"] = getTorque(xxxxxx);
-  doc["Torque_Yawn"] = getTorque(xxxxxx);
+  doc["Torque_Roll_1"] = TorqueRoll1;
+  doc["Torque_Roll_2"] = TorqueRoll2;
+  doc["Torque_Pitch"] = TorquePitch;
+  doc["Torque_Yawn"] =  TorqueYaw;
 
   char jsonBuffer[512];
   serializeJson(doc, jsonBuffer);
@@ -199,6 +206,7 @@ void setup() {
 
 void loop() {
   receiveOrientationUDP();
+  sendTorqueUDP();
   moveServos();
   delay(10);
 }
