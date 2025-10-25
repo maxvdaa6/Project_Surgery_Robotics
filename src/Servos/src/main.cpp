@@ -4,11 +4,6 @@
 #include <ArduinoJson.h> // Compatible amb versió 7.4.2
 #include <ESP32Servo.h>
 
-//DEfine variables for getToruque function
-#define sum = 0
-#define previous = 0
-
-
 
 // Device ID
 const char *deviceId = "G2_Servos";
@@ -105,17 +100,17 @@ void receiveOrientationUDP() {
 void sendTorqueUDP() {
   JsonDocument doc;
 
-  TorqueRoll1 = getTorque(sumRoll1, PIN_ANALOG_ROLL1, prevRoll1);
-  TorqueRoll2 = getTorque(sumRoll2, PIN_ANALOG_ROLL2, prevRoll2);
-  TorquePitch = getTorque(sumPitch, PIN_ANALOG_PITCH, prevPitch);
-  TorqueYaw = getTorque(sumYaw, PIN_ANALOG_YAW, prevYaw);
+  Torque_roll1 = getTorque(sumRoll1, PIN_ANALOG_ROLL1, prevRoll1);
+  Torque_roll2 = getTorque(sumRoll2, PIN_ANALOG_ROLL2, prevRoll2);
+  Torque_pitch = getTorque(sumPitch, PIN_ANALOG_PITCH, prevPitch);
+  Torque_yaw = getTorque(sumYaw, PIN_ANALOG_YAW, prevYaw);
 
 
   doc["device"] = deviceId;
-  doc["Torque_Roll_1"] = TorqueRoll1;
-  doc["Torque_Roll_2"] = TorqueRoll2;
-  doc["Torque_Pitch"] = TorquePitch;
-  doc["Torque_Yawn"] =  TorqueYaw;
+  doc["Torque_Roll_1"] = Torque_roll1;
+  doc["Torque_Roll_2"] = Torque_roll2;
+  doc["Torque_Pitch"] = Torque_pitch;
+  doc["Torque_Yawn"] =  Torque_yaw;
 
   char jsonBuffer[512];
   serializeJson(doc, jsonBuffer);
@@ -149,24 +144,40 @@ float getTorque(float& sum, int analogPin, float& previous) {
   return diff;
 }
 
+// void moveServos() {
+  //roll = Gri_roll;
+  //OldValueRoll = roll;
+  //pitch = Gri_pitch;
+  //OldValuePitch = pitch;
+  //yaw = Gri_yaw;
+  //OldValueYaw = yaw;
+
+  //float delta = 0;
+  //if (s1 == 0) {
+    //delta = 40;
+    //Serial.println("S1 premut → Obrint");
+  //}
+
+  //servo_roll1.write(Gri_roll + delta);
+  //servo_roll2.write(180 - Gri_roll);
+  //servo_pitch.write(pitch);
+  //servo_yaw.write(yaw);
+//}
+
 void moveServos() {
-  roll = Gri_roll;
-  OldValueRoll = roll;
-  pitch = Gri_pitch;
-  OldValuePitch = pitch;
-  yaw = Gri_yaw;
-  OldValueYaw = yaw;
+  // Neutral base at 90°, apply RPY around it
+  float roll_cmd = Gri_roll;
+  float pitch_cmd = Gri_pitch;
+  float yaw_cmd = Gri_yaw - yawOffset; // optional offset
 
-  float delta = 0;
+  servo_roll1.write(90 + roll_cmd);
+  servo_roll2.write(90 - roll_cmd);
+  servo_pitch.write(90 + pitch_cmd);
+  servo_yaw.write(90 + yaw_cmd);
+
   if (s1 == 0) {
-    delta = 40;
-    Serial.println("S1 premut → Obrint");
+    Serial.println("S1 pressed -> opening gripper");
   }
-
-  servo_roll1.write(Gri_roll + delta);
-  servo_roll2.write(180 - Gri_roll);
-  servo_pitch.write(pitch);
-  servo_yaw.write(yaw);
 }
 
 void setup() {
