@@ -21,19 +21,20 @@ You have seen the complexity to perform a simple surgery process in roboDK simul
 
 The main improvements are based on:
 - Servomotors module:
-    - apply the RPY angles to the four servomotors to obtain the desired Gripper orientation.
-    - read the torques on the four servomotors to detect the gripper contact with the tissue.
-    - send these torques to the Gripper module and PC.
-    ![ServomotorsModule](././Images/Session1/Servos1.png)
-    ![ServomotorsModule](././Images/Session1/Servos2.png)
-    ![ServomotorsModule](././Images/Session1/Servos3.png)
-
+    - Review how the RPY angles are applied to the four servomotors to obtain the desired Gripper orientation. Make necessary corrections to:
+        - Apply Roll angle from initial servomotor position in 90º
+        - Apply Pitch angle from initial servomotor position in 90º
+        - Apply `Yaw angle variation` from initial servomotor position in 90º to be independent of the geographical North 
+    - the torques are already read on the four servomotors to detect the gripper contact with the tissue.
+        ![ServomotorsModule](././Images/Session1/Servos1.png)
+        ![ServomotorsModule](././Images/Session1/Servos2.png)
+        ![ServomotorsModule](././Images/Session1/Servos3.png)
+        - Add modifications in main.cpp program to send these torques to the gripper and PC.
 - Endowrist module:
-    - send RPY angles to Gripper module
+    - No needed changes are required
 - Gripper module:
-    - receives the RPY angles from Endowrist module and correct the gripper orientation
-    - receives the torques from the Servomotors module.
-    - Apply a vibration with actuator to feel the contact with the tissue.
+    - Add modifications in main.cpp program to receive the torques from the Servomotors module.
+    - Add modifications in main.cpp program to drive the [vibration motor](https://www.amazon.es/dp/B0B82HS49C) according to the torques read to feel the contact with the tissue.
         - You have to add on void setup() the following code:
         ```cpp
         // Configure PWM for the vibration motor (channel 0)
@@ -51,19 +52,18 @@ The main improvements are based on:
         Serial.println(vibrationValue); 
         ```
 - PC module:
-    - receives the RPY corrected angles from the Gripper module and perform the simulated gripper orientation
-    - receives the RPY angles from the Endowrist module and apply them to the UR5e robot arm with a proper python based sockets program
-    - receives the torques from the Servomotors module and apply a color code and write the numeric values
+    - Add Servomotor torques reading
+        - Modify the Python program to add numeric torque values in TKinter pop-up window
+        - Add a "buttom" with color code to indicate the torque level in the TKinter pop-up window
+    - (Optional) Real time control of the UR5e robot arm:
+        - Create a copy of the `InitSurgeryRobotic_simulation.rdk` file to `InitSurgeryRobotic_real.rdk` file. Implement the UR5e movements using Python based sockets program.
+        - Modify the Python program to send the UR5e robot arm orientation commands according to the Endowrist tool orientation.
     
 ![Proposed Project Improvements](././Images/Session1/ProjectImprovements2.png)
 
-### Laboratory sessions: Tasks
-
-The proposed tasks for this first session are:
-- Connect properly the Hardware setup
-- Save the ESP32 custom Programs for the 3 ESP32 modules using PlatformIO. Take care about the proper IP address of each module and PC.
-- Run the InitSurgeryRobotic_students.rdk file in the roboDK program to visualize the UR5e robot arm and the Endowrist tool.
-- Test the system performances described above 
+### Laboratory session 3 Tasks
+The proposed tasks for this session are:
+- Save the ESP32 modules with the new programs you have created at home implementing the described improvements
 - Try to perform again the suture process in simulation according to the following video:
 [![suture process in simulation](Images/Session1/training.png)](https://youtu.be/1t3-Ggcp_Hg?feature=shared)
 

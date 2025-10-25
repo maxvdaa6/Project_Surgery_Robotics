@@ -110,14 +110,31 @@ The Initial functionality of the first prototype of the DaVinci surgery system i
 - In Real: The PC reads the RPY (Roll, Pitch, Yaw) orientation from Gripper and Endowrist modules and sends it to the UR5e robot arm in roboDK program environment
 
 
-### Laboratory sessions: Tasks
+### Laboratory session 1 Tasks:
 
 The proposed tasks for this first session are:
 - Connect properly the Hardware setup
 - Save the ESP32 InitialPrograms for the 3 ESP32 modules using PlatformIO. Take care about the proper IP address of each module and PC.
 - Run the Init_SurgeryRobotic_simulation.rdk file in the roboDK program to visualize the UR5e robot arm and the Endowrist tool.
 - Test the system performances described above 
+
+### Laboratory session 2 Tasks:
+
+The proposed tasks for this second session are:
 - Try to perform a suture process in simulation according to the following video:
 [![suture process in simulation](Images/Session1/training.png)](https://youtu.be/1t3-Ggcp_Hg?feature=shared)
+- IMU library performances:
+  - Verify the Endowrist tool Yaw orientation performance. 
+    - Are good the Yaw readings?
+    - Readings are stable and robust when you are close to the computer or metallic parts?
+    - Save the Endowrist_IMU program and verify the improvements in the Yaw orientation readings.
+  - Create a new Gripper_IMU program based on the Endowrist_IMU program to improve the Gripper tool Yaw orientation readings.
+  - Verify the improvements in Suture process simulation
+- Gripper RPY angle corrections:
+  - Perform:
+    - Move Endowrist Roll mantaining zero gripper roll
+    - Move Endowrist Pitch mantaining zero gripper pitch
+    - Move Endowrist Yaw mantaining zero gripper yaw
+  - Make the necessary corrections in roboDK python program to fix the observed issues
 
 Show and explain the system performances to your teacher.
