@@ -146,5 +146,6 @@ void setup() {
 void loop() {
   updateOrientation();
   sendOrientationUDP();
+  receiveTorquesUDP();
   delay(10);
 }
