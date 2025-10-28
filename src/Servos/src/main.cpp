@@ -43,7 +43,9 @@ float prevRoll1 = 0, prevRoll2 = 0, prevPitch = 0, prevYaw = 0;
 float sumRoll1 = 0, sumRoll2 = 0, sumPitch = 0, sumYaw = 0;
 float OldValueRoll = 0, OldValuePitch = 0, OldValueYaw = 0;
 float roll = 0, pitch = 0, yaw = 0;
+float yawOffset = 0.0;
 int s1 = 1, s2 = 1;
+float getTorque(float& sum, int analogPin, float& previous);
 
 void connectToWiFi() {
   Serial.print("Connecting to Wi-Fi");

@@ -32,6 +32,7 @@ IMU imu;
 
 // Orientation data
 float Gri_roll = 0.0, Gri_pitch = 0.0, Gri_yaw = 0.0;
+float Torque_roll1 = 0.0, Torque_roll2 = 0.0, Torque_pitch = 0.0, Torque_yaw = 0.0;
 
 void connectToWiFi() {
   Serial.print("Connecting to Wi-Fi");
