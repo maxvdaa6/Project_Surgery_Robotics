@@ -132,9 +132,9 @@ The proposed tasks for this second session are:
   - Verify the improvements in Suture process simulation
 - Gripper RPY angle corrections:
   - Perform:
-    - Move Endowrist Roll mantaining zero gripper roll
-    - Move Endowrist Pitch mantaining zero gripper pitch
-    - Move Endowrist Yaw mantaining zero gripper yaw
+    - Move Endowrist Roll mantaining zero gripper roll with respect to the Endowrist tool
+    - Move Endowrist Pitch mantaining zero gripper pitch with respect to the Endowrist tool
+    - Move Endowrist Yaw mantaining zero gripper yaw with respect to the Endowrist tool
   - Make the necessary corrections in roboDK python program to fix the observed issues
 
 Show and explain the system performances to your teacher.

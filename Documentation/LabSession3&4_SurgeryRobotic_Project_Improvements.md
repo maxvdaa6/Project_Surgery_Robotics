@@ -17,7 +17,7 @@ You have seen the complexity to perform a simple surgery process in roboDK simul
 - Implement your own improved surgical robotic system
 - Verify the improvements in the system performances for the same surgical process in roboDK simulation environment
 
-### Proposed improvements for Surgery Robotic system prototype in Biorobotcs Lab
+### Proposed improvements for Surgery Robotic system prototype in Biorobotics Lab
 
 The main improvements are based on:
 - Servomotors module:
@@ -61,7 +61,7 @@ The main improvements are based on:
     
 ![Proposed Project Improvements](././Images/Session1/ProjectImprovements2.png)
 
-### Laboratory session 3 Tasks
+### Laboratory session 3: Improvements experimental validation
 The proposed tasks for this session are:
 - Save the ESP32 modules with the new programs you have created at home implementing the described improvements
 - Try to perform again the suture process in simulation according to the following video:
@@ -69,7 +69,7 @@ The proposed tasks for this session are:
 
 Show and explain the system performances to your teacher.
 
-### Project Presentation
+### Laboratory session 4: Project Presentation
 
 Each Laboratory group has up to 10 minutes project presentation with:
 
