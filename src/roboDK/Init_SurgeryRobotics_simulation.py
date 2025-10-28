@@ -79,6 +79,7 @@ def read_data_UDP():
                 elif device_id == "G2_Gri":
                     with data_lock:
                         Gripper_rpy = received_data
+                        print("Gripper data received")
                 elif device_id == "G2_Servo":
                     with data_lock:
                         Servo_torques = received_data
