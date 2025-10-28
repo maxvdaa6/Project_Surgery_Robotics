@@ -4,27 +4,27 @@
 #include <ArduinoJson.h> // Compatible amb versió 7.4.2
 #include <ESP32Servo.h>
 
-
-// Device ID
+// ─────────────────────────────────────────────
+// Device & Wi-Fi setup
+// ─────────────────────────────────────────────
 const char *deviceId = "G2_Servos";
-
-// Wi-Fi credentials
 const char *ssid = "Robotics_UB";
 const char *password = "rUBot_xx";
 
-// UDP settings
+// UDP setup
 IPAddress receiverESP32IP(192, 168, 1, 21);
 IPAddress receiverComputerIP(192, 168, 1, 25);
 const int udpPort = 12345;
 WiFiUDP udp;
 
-// Servo settings
+// ─────────────────────────────────────────────
+// Servo setup
+// ─────────────────────────────────────────────
 Servo servo_yaw;
 Servo servo_pitch;
 Servo servo_roll1;
 Servo servo_roll2;
 
-// Pins
 const int PIN_ANALOG_YAW = 36;
 const int PIN_SIGNAL_YAW = 32;
 const int PIN_ANALOG_PITCH = 39;
@@ -36,17 +36,22 @@ const int PIN_SIGNAL_ROLL2 = 27;
 
 const float Rshunt = 1.6;
 
-// Variables
+// ─────────────────────────────────────────────
+// Global variables
+// ─────────────────────────────────────────────
 float Gri_roll = 0.0, Gri_pitch = 0.0, Gri_yaw = 0.0;
 float Torque_roll1 = 0.0, Torque_roll2 = 0.0, Torque_pitch = 0.0, Torque_yaw = 0.0;
 float prevRoll1 = 0, prevRoll2 = 0, prevPitch = 0, prevYaw = 0;
 float sumRoll1 = 0, sumRoll2 = 0, sumPitch = 0, sumYaw = 0;
-float OldValueRoll = 0, OldValuePitch = 0, OldValueYaw = 0;
-float roll = 0, pitch = 0, yaw = 0;
-float yawOffset = 0.0;
-int s1 = 1, s2 = 1;
-float getTorque(float& sum, int analogPin, float& previous);
 
+float yawOffset = 0.0;
+bool yawOffsetSet = false;
+
+int s1 = 1, s2 = 1;
+
+// ─────────────────────────────────────────────
+// Wi-Fi connection
+// ─────────────────────────────────────────────
 void connectToWiFi() {
   Serial.print("Connecting to Wi-Fi");
   WiFi.begin(ssid, password);
@@ -60,6 +65,9 @@ void connectToWiFi() {
   Serial.println(WiFi.macAddress());
 }
 
+// ─────────────────────────────────────────────
+// Receive orientation + button data from Gripper
+// ─────────────────────────────────────────────
 void receiveOrientationUDP() {
   int packetSize = udp.parsePacket();
   if (packetSize) {
@@ -67,12 +75,7 @@ void receiveOrientationUDP() {
     int len = udp.read(packetBuffer, 512);
     if (len > 0) {
       packetBuffer[len] = '\0';
-      Serial.print("Received packet size: ");
-      Serial.println(packetSize);
-      Serial.print("Received: ");
-      Serial.println((char*)packetBuffer);
-
-      JsonDocument doc;  // ✅ Versió 7
+      JsonDocument doc;
       DeserializationError error = deserializeJson(doc, packetBuffer);
       if (error) {
         Serial.print(F("deserializeJson() failed: "));
@@ -87,47 +90,34 @@ void receiveOrientationUDP() {
         Gri_yaw = round(doc["yaw"].as<float>());
         s1 = doc["s1"];
         s2 = doc["s2"];
+
+        // Initialize yaw offset only once
+        if (!yawOffsetSet) {
+          yawOffset = Gri_yaw;
+          yawOffsetSet = true;
+          Serial.print("Yaw offset initialized to: ");
+          Serial.println(yawOffset);
+        }
+
+        // Optional: recalibrate yaw offset with button S2
+        if (s2 == 0) {
+          yawOffset = Gri_yaw;
+          Serial.println("Yaw offset recalibrated!");
+        }
+
         Serial.print("Gri_Roll: "); Serial.print(Gri_roll);
         Serial.print(" Gri_Pitch: "); Serial.print(Gri_pitch);
         Serial.print(" Gri_Yaw: "); Serial.println(Gri_yaw);
         Serial.print("S1: "); Serial.print(s1);
         Serial.print(" S2: "); Serial.println(s2);
-      } else {
-        Serial.println("Unknown device.");
       }
     }
   }
 }
 
-void sendTorqueUDP() {
-  JsonDocument doc;
-
-  Torque_roll1 = getTorque(sumRoll1, PIN_ANALOG_ROLL1, prevRoll1);
-  Torque_roll2 = getTorque(sumRoll2, PIN_ANALOG_ROLL2, prevRoll2);
-  Torque_pitch = getTorque(sumPitch, PIN_ANALOG_PITCH, prevPitch);
-  Torque_yaw = getTorque(sumYaw, PIN_ANALOG_YAW, prevYaw);
-
-
-  doc["device"] = deviceId;
-  doc["Torque_Roll_1"] = Torque_roll1;
-  doc["Torque_Roll_2"] = Torque_roll2;
-  doc["Torque_Pitch"] = Torque_pitch;
-  doc["Torque_Yawn"] =  Torque_yaw;
-
-  char jsonBuffer[512];
-  serializeJson(doc, jsonBuffer);
-
-  // Send to ESP32 Servos
-  udp.beginPacket(receiverESP32IP, udpPort);
-  udp.write((const uint8_t*)jsonBuffer, strlen(jsonBuffer));
-  udp.endPacket();
-
-  // Send to Computer
-  udp.beginPacket(receiverComputerIP, udpPort);
-  udp.write((const uint8_t*)jsonBuffer, strlen(jsonBuffer));
-  udp.endPacket();
-}
-
+// ─────────────────────────────────────────────
+// Send torque values to PC and Gripper
+// ─────────────────────────────────────────────
 float getCurrent(uint32_t integrationTimeMs, int pin) {
   uint32_t startTime = millis();
   float integratedCurrent = 0;
@@ -146,31 +136,41 @@ float getTorque(float& sum, int analogPin, float& previous) {
   return diff;
 }
 
-// void moveServos() {
-  //roll = Gri_roll;
-  //OldValueRoll = roll;
-  //pitch = Gri_pitch;
-  //OldValuePitch = pitch;
-  //yaw = Gri_yaw;
-  //OldValueYaw = yaw;
+void sendTorqueUDP() {
+  JsonDocument doc;
 
-  //float delta = 0;
-  //if (s1 == 0) {
-    //delta = 40;
-    //Serial.println("S1 premut → Obrint");
-  //}
+  Torque_roll1 = getTorque(sumRoll1, PIN_ANALOG_ROLL1, prevRoll1);
+  Torque_roll2 = getTorque(sumRoll2, PIN_ANALOG_ROLL2, prevRoll2);
+  Torque_pitch = getTorque(sumPitch, PIN_ANALOG_PITCH, prevPitch);
+  Torque_yaw = getTorque(sumYaw, PIN_ANALOG_YAW, prevYaw);
 
-  //servo_roll1.write(Gri_roll + delta);
-  //servo_roll2.write(180 - Gri_roll);
-  //servo_pitch.write(pitch);
-  //servo_yaw.write(yaw);
-//}
+  doc["device"] = deviceId;
+  doc["Torque_Roll_1"] = Torque_roll1;
+  doc["Torque_Roll_2"] = Torque_roll2;
+  doc["Torque_Pitch"] = Torque_pitch;
+  doc["Torque_Yaw"] = Torque_yaw;
 
+  char jsonBuffer[512];
+  serializeJson(doc, jsonBuffer);
+
+  // Send to Gripper ESP32
+  udp.beginPacket(receiverESP32IP, udpPort);
+  udp.write((const uint8_t*)jsonBuffer, strlen(jsonBuffer));
+  udp.endPacket();
+
+  // Send to PC
+  udp.beginPacket(receiverComputerIP, udpPort);
+  udp.write((const uint8_t*)jsonBuffer, strlen(jsonBuffer));
+  udp.endPacket();
+}
+
+// ─────────────────────────────────────────────
+// Move servos according to IMU data
+// ─────────────────────────────────────────────
 void moveServos() {
-  // Neutral base at 90°, apply RPY around it
   float roll_cmd = Gri_roll;
   float pitch_cmd = Gri_pitch;
-  float yaw_cmd = Gri_yaw - yawOffset; // optional offset
+  float yaw_cmd = Gri_yaw - yawOffset; // independent from magnetic north
 
   servo_roll1.write(90 + roll_cmd);
   servo_roll2.write(90 - roll_cmd);
@@ -178,10 +178,13 @@ void moveServos() {
   servo_yaw.write(90 + yaw_cmd);
 
   if (s1 == 0) {
-    Serial.println("S1 pressed -> opening gripper");
+    Serial.println("S1 pressed → opening gripper");
   }
 }
 
+// ─────────────────────────────────────────────
+// Setup
+// ─────────────────────────────────────────────
 void setup() {
   Serial.begin(115200);
   Wire.begin();
@@ -191,6 +194,7 @@ void setup() {
   udp.begin(udpPort);
   Serial.println("UDP initialized");
 
+  // Servo setup
   ESP32PWM::allocateTimer(0);
   ESP32PWM::allocateTimer(1);
   ESP32PWM::allocateTimer(2);
@@ -211,12 +215,16 @@ void setup() {
   pinMode(PIN_ANALOG_ROLL1, INPUT);
   pinMode(PIN_ANALOG_ROLL2, INPUT);
 
+  // Initial neutral position
   servo_yaw.write(90);
   servo_pitch.write(90);
   servo_roll1.write(90);
   servo_roll2.write(90);
 }
 
+// ─────────────────────────────────────────────
+// Main loop
+// ─────────────────────────────────────────────
 void loop() {
   receiveOrientationUDP();
   sendTorqueUDP();
