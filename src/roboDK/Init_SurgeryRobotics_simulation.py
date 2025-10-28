@@ -66,7 +66,7 @@ def update_text_label(label, tool_orientation, gripper_orientation, status_messa
 
 # Function to read UDP data and update the global variable
 def read_data_UDP():
-    global Endowrist_rpy, Gripper_rpy, data_lock
+    global Endowrist_rpy, Gripper_rpy, Servo_torques, data_lock
     while True:
         try:
             data, addr = sock.recvfrom(BUFFER_SIZE) 
@@ -79,10 +79,11 @@ def read_data_UDP():
                 elif device_id == "G2_Gri":
                     with data_lock:
                         Gripper_rpy = received_data
-                        print("Gripper data received")
-                elif device_id == "G2_Servo":
+                        #print(received_data)
+                elif device_id == "G2_Servos":
                     with data_lock:
                         Servo_torques = received_data
+                        #print(Servo_torques)
             except json.JSONDecodeError:
                 print("Error decoding JSON data")
         except socket.error as e:
@@ -93,7 +94,7 @@ def read_data_UDP():
 
 # Function to process the latest UDP data and move the robot
 def move_robot(robot, gripper, needle, text_label):
-    global ZERO_YAW_TOOL, ZERO_YAW_GRIPPER, Endowrist_rpy, Gripper_rpy, data_lock
+    global ZERO_YAW_TOOL, ZERO_YAW_GRIPPER, Endowrist_rpy, Gripper_rpy, Servo_torques, data_lock
     global e_roll, e_pitch, e_yaw, g_roll, g_pitch, g_yaw, s1, s2, s3, s4
     
     endowrist_orientation_msg = ""
@@ -105,13 +106,14 @@ def move_robot(robot, gripper, needle, text_label):
         with data_lock:
             current_Endowrist_rpy = Endowrist_rpy
             current_Gripper_rpy = Gripper_rpy
+            current_Servo_torques = Servo_torques
 
         if current_Endowrist_rpy:
-            e_roll = Endowrist_rpy.get("roll")
-            e_pitch = Endowrist_rpy.get("pitch")
-            e_yaw = Endowrist_rpy.get("yaw")
-            s3 = Endowrist_rpy.get("s3")
-            s4 = Endowrist_rpy.get("s4")
+            e_roll = current_Endowrist_rpy.get("roll")
+            e_pitch = current_Endowrist_rpy.get("pitch")
+            e_yaw = current_Endowrist_rpy.get("yaw")
+            s3 = current_Endowrist_rpy.get("s3")
+            s4 = current_Endowrist_rpy.get("s4")
             endo_roll, endo_pitch, endo_yaw = endowrist2base_orientation(e_roll, e_pitch, e_yaw)
             #print(f"Endowrist: {endo_roll}, {endo_pitch}, {endo_yaw}")
             # Move Endowrist
@@ -140,11 +142,11 @@ def move_robot(robot, gripper, needle, text_label):
                     status_message = "❌ No es pot moure més en Z (relatiu)"
                     
         if current_Gripper_rpy:
-            g_roll = Gripper_rpy.get("roll")
-            g_pitch = Gripper_rpy.get("pitch")
-            g_yaw = Gripper_rpy.get("yaw")
-            s1 = Gripper_rpy.get("s1")
-            s2 = Gripper_rpy.get("s2")
+            g_roll = current_Gripper_rpy.get("roll")
+            g_pitch = current_Gripper_rpy.get("pitch")
+            g_yaw = current_Gripper_rpy.get("yaw")
+            s1 = current_Gripper_rpy.get("s1")
+            s2 = current_Gripper_rpy.get("s2")
             #print(f"Gripper: {g_roll}, {g_pitch}, {g_yaw}")
             # Move Gripper
             gripper_pose = gripper.Pose()
@@ -163,18 +165,19 @@ def move_robot(robot, gripper, needle, text_label):
                 needle.setPose(TxyzRxyz_2_Pose([0, 0, 0, 0, 0, 0]))
                 status_message = "🔵 S1 no premut: agulla agafada"
         
-        if Servo_torques:
-            t1 = Servo_torques.get("Torque_Roll_1", 0)
-            t2 = Servo_torques.get("Torque_Roll_2", 0)
-            tp = Servo_torques.get("Torque_Pitch", 0)
-            ty = Servo_torques.get("Torque_Yaw", 0)
+        if 'current_Servo_torques' in locals() and current_Servo_torques:
+            t1 = current_Servo_torques.get("Torque_Roll_1", 0)
+            t2 = current_Servo_torques.get("Torque_Roll_2", 0)
+            tp = current_Servo_torques.get("Torque_Pitch", 0)
+            ty = current_Servo_torques.get("Torque_Yaw", 0)
             servo_torques_msg = f"Torque R1={t1:.2f}, R2={t2:.2f}, P={tp:.2f}, Y={ty:.2f}"
+            print(servo_torques_msg)
 
             # Determine color indicator (low/medium/high torque)
             total_torque = abs(t1) + abs(t2) + abs(tp) + abs(ty)
-            if total_torque < 0.5:
+            if total_torque < 20:
                 color = "green"
-            elif total_torque < 1.0:
+            elif total_torque < 30:
                 color = "yellow"
             else:
                 color = "red"

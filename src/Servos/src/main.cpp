@@ -158,6 +158,15 @@ void sendTorqueUDP() {
   udp.write((const uint8_t*)jsonBuffer, strlen(jsonBuffer));
   udp.endPacket();
 
+  doc["device"] = deviceId;
+  doc["Torque_Roll_1"] = Torque_roll1;
+  doc["Torque_Roll_2"] = Torque_roll2;
+  doc["Torque_Pitch"] = Torque_pitch;
+  doc["Torque_Yaw"] = Torque_yaw;
+
+  //char jsonBuffer[512];
+  serializeJson(doc, jsonBuffer);
+
   // Send to PC
   udp.beginPacket(receiverComputerIP, udpPort);
   udp.write((const uint8_t*)jsonBuffer, strlen(jsonBuffer));
