@@ -113,6 +113,14 @@ void receiveTorquesUDP() {
         Torque_pitch = doc["Torque_Pitch"];
         Torque_yaw   = doc["Torque_Yaw"];
 
+        // Print the received torques
+        Serial.println("📦 Received Torques from Servos:");
+        Serial.print("Torque Roll 1: "); Serial.println(Torque_Roll_1, 3);
+        Serial.print("Torque Roll 2: "); Serial.println(Torque_Roll_2, 3);
+        Serial.print("Torque Pitch : "); Serial.println(Torque_Pitch, 3);
+        Serial.print("Torque Yaw   : "); Serial.println(Torque_Yaw, 3);
+        Serial.println("----------------------------------");
+
         // 🔸 Vibration motor control
         float totalTorque = Torque_roll1 + Torque_roll2 + Torque_pitch + Torque_yaw;
         int vibrationValue = constrain(totalTorque * 2.5, 0, 255);
