@@ -41,8 +41,9 @@ const float Rshunt = 1.6;
 // ─────────────────────────────────────────────
 float Gri_roll = 0.0, Gri_pitch = 0.0, Gri_yaw = 0.0;
 float Torque_roll1 = 0.0, Torque_roll2 = 0.0, Torque_pitch = 0.0, Torque_yaw = 0.0;
-float prevRoll1 = 0, prevRoll2 = 0, prevPitch = 0, prevYaw = 0;
-float sumRoll1 = 0, sumRoll2 = 0, sumPitch = 0, sumYaw = 0;
+float prevRoll1 = 0.0, prevRoll2 = 0.0, prevPitch = 0.0, prevYaw = 0.0;
+float sumRoll1 = 0.0, sumRoll2 = 0.0, sumPitch = 0.0, sumYaw = 0.0;
+float roll = 0.0, OldValueRoll = 0.0, pitch = 0.0, OldValuePitch = 0.0, yaw = 0.0, OldValueYaw = 0;
 
 float yawOffset = 0.0;
 bool yawOffsetSet = false;
@@ -84,7 +85,7 @@ void receiveOrientationUDP() {
       }
 
       const char* device = doc["device"];
-      if (strcmp(device, "G5_Gri") == 0) {
+      if (strcmp(device, "G2_Gri") == 0) {
         Gri_roll = round(doc["roll"].as<float>());
         Gri_pitch = round(doc["pitch"].as<float>());
         Gri_yaw = round(doc["yaw"].as<float>());
@@ -176,19 +177,39 @@ void sendTorqueUDP() {
 // ─────────────────────────────────────────────
 // Move servos according to IMU data
 // ─────────────────────────────────────────────
+//void moveServos() {
+  //float roll_cmd = Gri_roll;
+  //float pitch_cmd = Gri_pitch;
+  //float yaw_cmd = Gri_yaw - yawOffset; // independent from magnetic north
+
+  //servo_roll1.write(90 + roll_cmd);
+  //servo_roll2.write(90 - roll_cmd);
+  //servo_pitch.write(90 + pitch_cmd);
+  //servo_yaw.write(90 + yaw_cmd);
+
+  //if (s1 == 0) {
+    //Serial.println("S1 pressed → opening gripper");
+ // }
+//}
+
 void moveServos() {
-  float roll_cmd = Gri_roll;
-  float pitch_cmd = Gri_pitch;
-  float yaw_cmd = Gri_yaw - yawOffset; // independent from magnetic north
+  roll = Gri_roll;
+  OldValueRoll = roll;
+  pitch = Gri_pitch;
+  OldValuePitch = pitch;
+  yaw = Gri_yaw;
+  OldValueYaw = yaw;
 
-  servo_roll1.write(90 + roll_cmd);
-  servo_roll2.write(90 - roll_cmd);
-  servo_pitch.write(90 + pitch_cmd);
-  servo_yaw.write(90 + yaw_cmd);
-
+  float delta = 0;
   if (s1 == 0) {
-    Serial.println("S1 pressed → opening gripper");
+    delta = 40;
+    Serial.println("S1 premut → Obrint");
   }
+
+  servo_roll1.write(Gri_roll + delta);
+  servo_roll2.write(180 - Gri_roll);
+  servo_pitch.write(pitch);
+  servo_yaw.write(yaw);
 }
 
 // ─────────────────────────────────────────────
@@ -239,4 +260,5 @@ void loop() {
   sendTorqueUDP();
   moveServos();
   delay(10);
+  Serial.println(roll);
 }
